@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ZSens - Sens Calculator</title>
+	<link rel="icon" href="https://bimaio.es/images/about-check.svg">
+  <style>
+    body {
+      background-color: #202124;
+      color: #FFF;
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      grid-column-gap: 20px;
+    }
+
+    .logo-container {
+      grid-column: 1;
+      grid-row: 1;
+      margin-right: 20px;
+    }
+
+    .author-container {
+      grid-column: 3;
+      grid-row: 1;
+      text-align: right;
+      margin-left: auto;
+    }
+
+    .table-container {
+      grid-column: 2;
+      grid-row: 1;
+    }
+
+    .logo {
+      font-size: 24px;
+      font-weight: bold;
+      color: #FFF;
+      margin-bottom: 10px;
+    }
+
+    .description {
+      color: #CCC;
+      margin-bottom: 20px;
+    }
+
+    .author {
+      color: #FFF;
+      margin-bottom: 10px;
+    }
+
+    .donation-container {
+      text-align: right;
+    }
+
+    .donation-link {
+      color: #FFF;
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    .container2 {
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .table-container2 {
+      width: 100%;
+    }
+
+    table {
+      width: 100%;
+      margin-bottom: 20px;
+    }
+
+    th {
+      text-align: left;
+    }
+
+    input[type="number"] {
+		width: 100px;
+		padding: 5px;
+		background-color: #000000;
+		color: #FFFFFF;
+		border: 1px solid #6500fe;
+    }
+
+    .resultados-container2 {
+      display: flex;
+      flex-direction: column;
+	margin-left: 0px;
+    }
+
+    .etapa-container2 {
+      display: flex;
+      align-items: center;
+	  margin-bottom: 5px;
+    }
+
+    .etapa-number {
+      width: 50px;
+      text-align: center;
+    }
+
+    .sens-button {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 80px;
+      height: 30px;
+      margin-right: 10px;
+      border: none;
+      border-radius: 5px;
+      font-weight: bold;
+      cursor: pointer;
+      background-color: green;
+      color: #FFF;
+    }
+
+    .sens-button.selected {
+      background-color: red;
+      color: #FFF;
+    }
+
+    .sens-button:nth-child(3) {
+      background-color: #6500fe;
+    }
+
+    br {
+      line-height: 1.5;
+    }
+
+    li {
+      line-height: 1.5;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="logo-container">
+    <div class="logo">ZSens - Sens Calculator [BETA]</div>
+    <div class="description">
+      Esta web te ayudará a encontrar la sensibilidad adecuada para mejorar la precisión de tu aim en tu juego FPS favorito.
+      <br><b>¿Como funciona?</b></br>
+      <ol>
+        <li>Introduce tu sensibilidad base.</li>
+        <li>Introduce cantidad de etapas (promedios a obtener).</li>
+        <li>Se creará una tabla de calculos.</li>
+        <li>Haz click derecho en la sensibilidad que deseas probar.</li>
+        <li>Haz click izquierdo en la que menos te gustó (se tornará roja).</li>
+        <li>Se generará una nueva etapa de sensibilidades hasta que llegues a la cantidad de etapas establecida.</li>
+        <li>Completa todas las etapas y llega a tu sensibilidad ideal (casilla morada / casilla de en medio).</li>
+      </ol>
+      <br><b>Recomendaciones:</b></br>
+      <ul>
+        <li>Haz un mínimo de 7 etapas para que te funcione, ten en cuenta que mientras más veces lo hagas, mayor acertado será tu dato.</li>
+        <li>Procura tener deshabilitada la precisión del mouse (windows) y aceleración del ratón (in game).</li>
+      </ul>
+    </div>
+  </div>
+  <div class="table-container">
+    <div class="table-container2">
+      <table>
+        <tr>
+          <th>Ingresa tu sensibilidad base:</th>
+          <td><input type="number" step="0.00001" max="10" id="sensibilidad"></td>
+        </tr>
+        <tr>
+          <th>Ingresa número de etapas a calcular:</th>
+          <td><input type="number" step="1" max="10" id="etapas"></td>
+        </tr>
+      </table>
+    </div>
+    <div class="table-container2">
+      <div class="resultados-container2">
+        <div id="resultados"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="author-container">
+    <div class="author">
+      <a class="donation-link" href="https://criskkky.carrd.co/" target="_blank">@criskkky</a>
+    </div>
+    <div class="donation-container">
+      <a class="donation-link" href="https://paypal.me/criskywallet/" target="_blank">Donación PayPal</a>
+      <a class="donation-link" href="https://steamcommunity.com/tradeoffer/new/?partner=70500506&token=xsM5f6UK/" target="_blank">Donación Skins</a></div>
+      <a class="donation-link" href="https://www.youtube.com/@Znorux" target="_blank"><br>@znorux</a>
+    </div>
+  </div>
+
+  <script>
+    const sensibilidadInput = document.getElementById('sensibilidad');
+    const etapasInput = document.getElementById('etapas');
+    const resultadosDiv = document.getElementById('resultados');
+
+    sensibilidadInput.addEventListener('input', validarSensibilidad);
+    etapasInput.addEventListener('input', generarResultados);
+
+    function validarSensibilidad() {
+      let sensibilidadInputValue = sensibilidadInput.value;
+
+      // Reemplazar coma por punto decimal
+      sensibilidadInputValue = sensibilidadInputValue.replace('.', ',');
+
+      const sensibilidad = parseFloat(sensibilidadInputValue);
+
+      if (sensibilidad > 10) {
+        alert('El valor de entrada es demasiado alto, considera un valor menor.');
+        sensibilidadInput.value = '';
+      }
+    }
+
+    function generarResultados() {
+      resultadosDiv.innerHTML = '';
+
+      const etapas = parseInt(etapasInput.value);
+
+      if (isNaN(etapas) || etapas < 1) {
+        return;
+      }
+
+      let sensibilidadbase = parseFloat(sensibilidadInput.value);
+
+      generarResultadosEtapa(1, sensibilidadbase);
+    }
+
+    function generarResultadosEtapa(etapa, sensibilidadbase) {
+      const sensDividida = sensibilidadbase / 2;
+      const sensMultiplicada = sensibilidadbase * 1.5;
+
+      const etapacontainer2 = document.createElement('div');
+      etapacontainer2.classList.add('etapa-container2');
+      resultadosDiv.appendChild(etapacontainer2);
+
+      const etapaNumber = document.createElement('div');
+      etapaNumber.classList.add('etapa-number');
+      etapaNumber.textContent = etapa;
+      etapacontainer2.appendChild(etapaNumber);
+
+      const sensButtonDividida = createSensButton(sensDividida.toFixed(5));
+      const sensButtonbase = createSensButton(sensibilidadbase.toFixed(5));
+      const sensButtonMultiplicada = createSensButton(sensMultiplicada.toFixed(5));
+
+      etapacontainer2.appendChild(sensButtonDividida);
+      etapacontainer2.appendChild(sensButtonbase);
+      etapacontainer2.appendChild(sensButtonMultiplicada);
+
+      let clicked = false;
+
+      sensButtonDividida.addEventListener('click', () => {
+        if (!clicked) {
+          clicked = true;
+          updateSelection(sensButtonDividida, sensButtonbase, sensButtonMultiplicada);
+          const nuevasensibilidadbase = (parseFloat(sensButtonbase.textContent) + parseFloat(sensButtonMultiplicada.textContent)) / 2;
+          if (etapa < etapasInput.value) {
+            generarResultadosEtapa(etapa + 1, nuevasensibilidadbase);
+          }
+        }
+      });
+
+      sensButtonbase.addEventListener('contextmenu', (event) => {
+        event.preventDefault();
+      });
+
+      sensButtonMultiplicada.addEventListener('click', () => {
+        if (!clicked) {
+          clicked = true;
+          updateSelection(sensButtonMultiplicada, sensButtonDividida, sensButtonbase);
+          const nuevasensibilidadbase = (parseFloat(sensButtonDividida.textContent) + parseFloat(sensButtonbase.textContent)) / 2;
+          if (etapa < etapasInput.value) {
+            generarResultadosEtapa(etapa + 1, nuevasensibilidadbase);
+          }
+        }
+      });
+    }
+
+    function createSensButton(value) {
+      const button = document.createElement('button');
+      button.classList.add('sens-button');
+      button.textContent = value;
+
+      button.addEventListener('contextmenu', (event) => {
+        event.preventDefault();
+        const textToCopy = event.target.textContent;
+        navigator.clipboard.writeText(textToCopy)
+          .then(() => {
+            alert('ZSens: Valor copiado.');
+          })
+          .catch((error) => {
+            console.error('ZSens: Error, reporta este problema al autor.', error);
+          });
+      });
+
+      return button;
+    }
+
+    function updateSelection(selectedButton, button1, button2) {
+      selectedButton.classList.add('selected');
+      button1.classList.remove('selected');
+      button2.classList.remove('selected');
+    }
+  </script>
+</body>
+
+</html>
